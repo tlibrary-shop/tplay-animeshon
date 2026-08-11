@@ -1,7 +1,14 @@
 import type { MetadataRoute } from "next";
 import { API_URL, SITE_URL } from "@/utils/config";
 
-type Anime = { slug?: string; link?: string; detail_url?: string };
+type Anime = {
+  slug?: string;
+  link?: string;
+  detail_url?: string;
+  updated_at?: string;
+  updatedAt?: string;
+  last_modified?: string;
+};
 
 type PaginatedResponse = {
   data?: Anime[];
@@ -14,9 +21,11 @@ type PaginatedResponse = {
 export const revalidate = 3600;
 
 const API_REQUEST_TIMEOUT_MS = 5000;
-const GENERATION_TIMEOUT_MS = 15000;
-const MAX_PAGES_PER_ENDPOINT = 100;
-const PAGE_CONCURRENCY = 6;
+// The catalog can contain tens of thousands of anime. The API's total_page
+// value determines the actual size; these are only safety limits.
+const GENERATION_TIMEOUT_MS = 60000;
+const MAX_PAGES_PER_ENDPOINT = 1000;
+const PAGE_CONCURRENCY = 12;
 const CATALOG_ENDPOINTS = ["/new-anime", "/order-anime/latest-added"];
 const STATIC_ROUTES = [
   "",
@@ -32,7 +41,6 @@ const STATIC_ROUTES = [
   "/type/movie",
   "/category/ongoing",
   "/category/completed",
-  "/anime/one-piece",
   "/faq",
   "/contact",
   "/terms",
@@ -49,10 +57,14 @@ function slugOf(anime: Anime) {
   return normalizeSlug(raw.split("?")[0].split("/").filter(Boolean).pop() || "");
 }
 
-function addSlugs(page: PaginatedResponse | null, slugs: Set<string>) {
+function addSlugs(page: PaginatedResponse | null, slugs: Set<string>, modified: Map<string, Date>) {
   for (const anime of page?.data || []) {
     const slug = slugOf(anime);
-    if (slug) slugs.add(slug);
+    if (!slug) continue;
+    slugs.add(slug);
+    const rawDate = anime.updated_at || anime.updatedAt || anime.last_modified;
+    const date = rawDate ? new Date(rawDate) : null;
+    if (date && !Number.isNaN(date.getTime())) modified.set(slug, date);
   }
 }
 
@@ -88,13 +100,14 @@ async function fetchRemainingPages(
   totalPages: number,
   deadline: number,
   slugs: Set<string>,
+  modified: Map<string, Date>,
 ) {
   let nextPage = 2;
 
   async function worker() {
     while (nextPage <= totalPages && Date.now() < deadline) {
       const page = nextPage++;
-      addSlugs(await fetchPage(endpoint, page, deadline), slugs);
+      addSlugs(await fetchPage(endpoint, page, deadline), slugs, modified);
     }
   }
 
@@ -105,6 +118,7 @@ async function fetchRemainingPages(
 async function getAnimeUrls() {
   const deadline = Date.now() + GENERATION_TIMEOUT_MS;
   const slugs = new Set<string>();
+  const modified = new Map<string, Date>();
 
   // Fetch both catalog heads at once. If either endpoint is unavailable, the
   // other one can still contribute URLs to the sitemap.
@@ -115,7 +129,7 @@ async function getAnimeUrls() {
   await Promise.all(
     CATALOG_ENDPOINTS.map(async (endpoint, index) => {
       const first = firstPages[index];
-      addSlugs(first, slugs);
+      addSlugs(first, slugs, modified);
       if (!first) return;
 
       // Bound malformed/very large API responses. The time budget remains the
@@ -124,19 +138,22 @@ async function getAnimeUrls() {
         Math.max(Number(first.total_page) || 1, 1),
         MAX_PAGES_PER_ENDPOINT,
       );
-      await fetchRemainingPages(endpoint, totalPages, deadline, slugs);
+      await fetchRemainingPages(endpoint, totalPages, deadline, slugs, modified);
     }),
   );
 
-  return [...slugs];
+  return { slugs: [...slugs], modified };
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const anime = await getAnimeUrls();
+  const { slugs, modified } = await getAnimeUrls();
   const entries = [
-    ...STATIC_ROUTES.map(path => ({ url: `${SITE_URL}${path}`, lastModified: now, changeFrequency: "daily" as const, priority: path === "" ? 1 : 0.7 })),
-    ...anime.map(slug => ({ url: `${SITE_URL}/anime/${encodeURIComponent(slug)}`, lastModified: now, changeFrequency: "daily" as const, priority: slug === "one-piece" ? 0.95 : 0.8 })),
+    ...STATIC_ROUTES.map(path => ({ url: `${SITE_URL}${path}`, lastModified: now })),
+    ...slugs.map(slug => ({
+      url: `${SITE_URL}/anime/${encodeURIComponent(slug)}`,
+      lastModified: modified.get(slug) ?? now,
+    })),
   ];
 
   // Defensive deduplication keeps the sitemap valid when an anime appears in
