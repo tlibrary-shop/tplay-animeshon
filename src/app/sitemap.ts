@@ -28,23 +28,23 @@ const MAX_PAGES_PER_ENDPOINT = 1000;
 const PAGE_CONCURRENCY = 12;
 const CATALOG_ENDPOINTS = ["/new-anime", "/order-anime/latest-added"];
 const STATIC_ROUTES = [
-  "",
-  "/latest",
-  "/popular",
-  "/schedule",
-  "/genres",
-  "/type",
-  "/type/tv",
-  "/type/ova",
-  "/type/ona",
-  "/type/special",
-  "/type/movie",
-  "/category/ongoing",
-  "/category/completed",
-  "/faq",
-  "/contact",
-  "/terms",
-  "/privacy",
+  { path: "", priority: 1, changeFrequency: "daily" as const },
+  { path: "/latest", priority: 0.8, changeFrequency: "hourly" as const },
+  { path: "/popular", priority: 0.7, changeFrequency: "daily" as const },
+  { path: "/schedule", priority: 0.7, changeFrequency: "daily" as const },
+  { path: "/genres", priority: 0.6, changeFrequency: "weekly" as const },
+  { path: "/type", priority: 0.6, changeFrequency: "weekly" as const },
+  { path: "/type/tv", priority: 0.6, changeFrequency: "weekly" as const },
+  { path: "/type/ova", priority: 0.5, changeFrequency: "weekly" as const },
+  { path: "/type/ona", priority: 0.5, changeFrequency: "weekly" as const },
+  { path: "/type/special", priority: 0.5, changeFrequency: "weekly" as const },
+  { path: "/type/movie", priority: 0.6, changeFrequency: "weekly" as const },
+  { path: "/category/ongoing", priority: 0.7, changeFrequency: "daily" as const },
+  { path: "/category/completed", priority: 0.6, changeFrequency: "weekly" as const },
+  { path: "/faq", priority: 0.3, changeFrequency: "monthly" as const },
+  { path: "/contact", priority: 0.2, changeFrequency: "yearly" as const },
+  { path: "/terms", priority: 0.1, changeFrequency: "yearly" as const },
+  { path: "/privacy", priority: 0.1, changeFrequency: "yearly" as const },
 ];
 
 function normalizeSlug(value: string) {
@@ -149,10 +149,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const { slugs, modified } = await getAnimeUrls();
   const entries = [
-    ...STATIC_ROUTES.map(path => ({ url: `${SITE_URL}${path}`, lastModified: now })),
+    ...STATIC_ROUTES.map(route => ({
+      url: `${SITE_URL}${route.path}`,
+      lastModified: now,
+      priority: route.priority,
+      changeFrequency: route.changeFrequency,
+    })),
     ...slugs.map(slug => ({
       url: `${SITE_URL}/anime/${encodeURIComponent(slug)}`,
       lastModified: modified.get(slug) ?? now,
+      priority: 0.8,
+      changeFrequency: "daily" as const,
     })),
   ];
 

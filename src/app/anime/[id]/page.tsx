@@ -1,39 +1,19 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import AnimeClient from "./AnimeClient";
-import { API_URL, SITE_URL } from "@/utils/config";
-
-type AnimeDetail = {
-  title?: string;
-  english_title?: string;
-  japanese_title?: string;
-  description?: string;
-  descriptions?: string[];
-  img?: string;
-  poster?: string;
-  status?: string;
-  genres?: { title?: string; name?: string }[] | string[];
-  episodes?: { episode?: number | string; title?: string; detail_eps?: string }[];
-};
-
-async function getAnime(id: string): Promise<AnimeDetail | null> {
-  try {
-    const response = await fetch(`${API_URL}/detail-anime/${encodeURIComponent(id)}`, { next: { revalidate: 3600 } });
-    if (!response.ok) return null;
-    const json = await response.json();
-    return json?.data || json;
-  } catch { return null; }
-}
+import { JsonLd } from "@/components/Seo/JsonLd";
+import { getAnime, getAnimeDescription, getGenres, getPoster } from "@/utils/anime";
+import { SITE_URL } from "@/utils/config";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const anime = await getAnime(id);
   const title = anime?.title || id.replace(/[-_]/g, " ");
-  const description = anime?.description || anime?.descriptions?.[0] || `Nonton anime ${title} subtitle Indonesia dengan episode terbaru, sinopsis, jadwal, dan pilihan server streaming.`;
+  const description = anime ? getAnimeDescription(anime, `Nonton anime ${title} subtitle Indonesia dengan episode terbaru di AniStream.`) : `Nonton anime ${title} subtitle Indonesia dengan episode terbaru di AniStream.`;
   const canonical = `${SITE_URL}/anime/${encodeURIComponent(id)}`;
   return {
-    title: `Nonton Anime ${title} Sub Indo | Episode Terbaru`,
-    description: description.slice(0, 160),
+    title: `Nonton ${title} Sub Indo`,
+    description,
     keywords: [
       `nonton anime ${title}`,
       `nonton ${title} sub indo`,
@@ -41,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       `${title} subtitle Indonesia`,
     ],
     alternates: { canonical },
-    openGraph: { title: `Nonton ${title} Sub Indo`, description: description.slice(0, 160), url: canonical, type: "video.tv_show", images: anime?.img || anime?.poster ? [{ url: anime.img || anime.poster || "" }] : undefined },
+    openGraph: { title: `Nonton ${title} Sub Indo`, description, url: canonical, type: "video.tv_show", images: [{ url: anime ? getPoster(anime) : `${SITE_URL}/banner.png` }] },
   };
 }
 
@@ -50,8 +30,9 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
   const anime = await getAnime(id);
   if (!anime) notFound();
   const title = anime.title || id;
-  const description = (anime.description || anime.descriptions?.[0] || `Informasi ${title} dan daftar episode subtitle Indonesia.`).slice(0, 500);
-  const genres = (anime.genres || []).map((genre) => typeof genre === "string" ? genre : genre.title || genre.name || "").filter(Boolean);
+  const description = getAnimeDescription(anime, `Informasi ${title} dan daftar episode subtitle Indonesia.`);
+  const genres = getGenres(anime);
+  const poster = getPoster(anime);
   const canonical = `${SITE_URL}/anime/${encodeURIComponent(id)}`;
   const episodes = (anime.episodes || [])
     .filter((episode) => episode.episode != null)
@@ -64,10 +45,11 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
       return episodeB - episodeA;
     });
   const schema = {
-    "@context": "https://schema.org", "@type": "TVSeries", name: title,
+    "@context": "https://schema.org", "@type": "TVSeries", "@id": `${canonical}#series`, name: title,
     alternateName: [anime.english_title, anime.japanese_title].filter(Boolean), description,
-    image: anime.img || anime.poster, url: canonical,
-    genre: genres, inLanguage: "id", isFamilyFriendly: true,
+    image: [poster], url: canonical,
+    genre: genres, inLanguage: "id-ID", isFamilyFriendly: true,
+    isPartOf: { "@id": `${SITE_URL}/#website` },
   };
   const breadcrumb = {
     "@context": "https://schema.org", "@type": "BreadcrumbList",
@@ -82,13 +64,13 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
     itemListElement: episodes.map((episode, index) => ({
       "@type": "ListItem", position: index + 1,
       name: episode.title || `Episode ${episode.episode}`,
-      url: `${canonical}#episode-${episode.episode}`,
+      url: `${SITE_URL}/watch/${encodeURIComponent(id)}/${encodeURIComponent(String(episode.episode))}`,
     })),
   } : null;
   return <>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
-    {episodeList && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(episodeList) }} />}
+    <JsonLd data={schema} />
+    <JsonLd data={breadcrumb} />
+    {episodeList && <JsonLd data={episodeList} />}
     <section className="px-4 pt-24 pb-6 md:px-16 md:pt-28 bg-gray-900" aria-label={`Informasi ${title}`}>
       <h1 className="text-2xl md:text-3xl font-semibold">Nonton {title} Sub Indo</h1>
       <p className="mt-3 max-w-4xl text-gray-300 leading-7">{description}</p>
@@ -99,7 +81,7 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
           <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
             {episodes.map((episode) => (
               <li key={String(episode.episode)}>
-                <a href={`${canonical}#episode-${episode.episode}`}>
+                <a href={`${SITE_URL}/watch/${encodeURIComponent(id)}/${encodeURIComponent(String(episode.episode))}`}>
                   {episode.title || `Episode ${episode.episode}`}
                 </a>
               </li>
