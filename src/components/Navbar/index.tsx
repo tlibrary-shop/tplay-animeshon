@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
-import { UserRound, Bookmark, Search, Play, Bell, Menu, X, Home, Film, Heart, Calendar, Tv, Compass, Loader2, Languages } from 'lucide-react';
+import { UserRound, Bookmark, Search, Bell, Menu, X, Home, Film, Heart, Calendar, Tv, Compass, Loader2, Languages } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -119,7 +119,14 @@ const Navbar = () => {
           {/* Logo & Menu */}
           <div className='flex min-w-0 items-center gap-4 md:gap-8'>
             <Link href="/" className='flex min-w-0 items-center gap-2 group'>
-              <Play className='text-red-600 fill-red-600 w-7 h-7 md:w-8 md:h-8 group-hover:scale-110 transition-transform' />
+              <Image
+                src="/favicon.ico"
+                alt="AniStream"
+                width={32}
+                height={32}
+                className="h-7 w-7 object-contain md:h-8 md:w-8 group-hover:scale-110 transition-transform"
+                priority
+              />
               <span className='text-red-600 font-heading text-lg sm:text-xl md:text-3xl tracking-wide truncate group-hover:text-red-500 transition-colors'>
                 AniStream
               </span>

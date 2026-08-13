@@ -31,7 +31,7 @@ export default function RootLayout({
       <html lang="id">
         <body className="antialiased bg-gray-800 text-white font-sans overflow-x-hidden">
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "WebSite", name: "AniStream", url: SITE_URL, inLanguage: ["id-ID", "en-US"], potentialAction: { "@type": "SearchAction", target: `${SITE_URL}/search?q={search_term_string}`, "query-input": "required name=search_term_string" } }) }} />
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "Organization", name: "AniStream", url: SITE_URL, logo: `${SITE_URL}/banner.png` }) }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "Organization", name: "AniStream", url: SITE_URL, logo: `${SITE_URL}/favicon.ico` }) }} />
           <Providers>
             {children}
           </Providers>

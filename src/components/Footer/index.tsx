@@ -1,7 +1,8 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { Play, Facebook, Twitter, Instagram, Youtube, Heart } from "lucide-react";
+import { Facebook, Twitter, Instagram, Youtube, Heart } from "lucide-react";
+import Image from "next/image";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -43,9 +44,7 @@ const Footer = () => {
           {/* Logo & Description */}
           <div className="md:max-w-xs">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-red-600 rounded flex items-center justify-center">
-                <Play className="w-5 h-5 text-white fill-white" />
-              </div>
+              <Image src="/favicon.ico" alt="AniStream" width={40} height={40} className="h-10 w-10 object-contain" />
               <span className="text-2xl font-heading text-white">AniStream</span>
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed mb-4">
