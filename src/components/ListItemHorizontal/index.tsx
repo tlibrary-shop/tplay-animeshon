@@ -5,7 +5,7 @@ import axios from "axios";
 import { Star, Play, Plus, ChevronRight, Radio, CheckCircle, Check } from "lucide-react";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import { Autoplay, Navigation } from "swiper/modules";
 import { useQuery } from "@tanstack/react-query";
 import { toggleMyList, isInMyList } from "@/utils/myList";
 
@@ -147,8 +147,15 @@ const ListItemHorizontal = (props: ListItemHorizontalProps) => {
       </div>
 
       <Swiper
-        modules={[Navigation]}
+        modules={variant === "ongoing" ? [Autoplay, Navigation] : [Navigation]}
         navigation
+        loop={variant === "ongoing" && !placeholder && !data.isLoading}
+        autoplay={variant === "ongoing" && !placeholder && !data.isLoading ? {
+          delay: 1,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        } : false}
+        speed={variant === "ongoing" ? 5000 : 300}
         spaceBetween={10}
         slidesPerView={2}
         breakpoints={{
