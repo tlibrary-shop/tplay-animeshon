@@ -47,6 +47,7 @@ export default function RootLayout({
               gtag('config', 'G-C4EQ753MZB');
             `}
           </Script>
+          <Script src="/Script.js" strategy="afterInteractive" />
           <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: "AniStream", url: SITE_URL, inLanguage: ["id-ID", "en-US"], potentialAction: { "@type": "SearchAction", target: `${SITE_URL}/search?q={search_term_string}`, "query-input": "required name=search_term_string" } }} />
           <JsonLd data={{ "@context": "https://schema.org", "@type": "Organization", "@id": `${SITE_URL}/#organization`, name: "AniStream", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/banner.png` } }} />
           <Providers>
