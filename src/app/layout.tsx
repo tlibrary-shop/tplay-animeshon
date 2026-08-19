@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 // @ts-ignore
 import "swiper/css/bundle";
@@ -33,6 +34,19 @@ export default function RootLayout({
   return (
       <html lang="id">
         <body className="antialiased bg-gray-800 text-white font-sans overflow-x-hidden">
+          <Script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-C4EQ753MZB"
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-C4EQ753MZB');
+            `}
+          </Script>
           <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: "AniStream", url: SITE_URL, inLanguage: ["id-ID", "en-US"], potentialAction: { "@type": "SearchAction", target: `${SITE_URL}/search?q={search_term_string}`, "query-input": "required name=search_term_string" } }} />
           <JsonLd data={{ "@context": "https://schema.org", "@type": "Organization", "@id": `${SITE_URL}/#organization`, name: "AniStream", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/banner.png` } }} />
           <Providers>
