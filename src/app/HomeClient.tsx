@@ -213,6 +213,7 @@ export default function Home({ initialNewAnime }: HomeClientProps) {
   return (
     <div className="bg-black min-h-screen">
       <Navbar />
+      <h1 className="sr-only">Nonton Anime Sub Indo Terbaru dan Terlengkap di AniStream</h1>
       
       {/* Hero Slider */}
       <div className="relative">
@@ -299,9 +300,9 @@ export default function Home({ initialNewAnime }: HomeClientProps) {
                       </div>
 
                       {/* Title */}
-                      <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-heading text-white mb-2 sm:mb-4 drop-shadow-2xl leading-tight">
+                      <h2 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-heading text-white mb-2 sm:mb-4 drop-shadow-2xl leading-tight">
                         {anime.title}
-                      </h1>
+                      </h2>
 
                       {/* Meta Info */}
                       <div className="flex items-center gap-2 sm:gap-3 mb-3 md:mb-4 text-xs sm:text-sm">

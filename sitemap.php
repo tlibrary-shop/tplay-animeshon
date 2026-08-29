@@ -18,7 +18,8 @@ header('Cache-Control: public, max-age=300, s-maxage=300');
 function xmlUrl(string $siteUrl, string $path, ?string $lastmod, string $changefreq, string $priority): string
 {
     $url = htmlspecialchars($siteUrl . '/' . ltrim($path, '/'), ENT_XML1 | ENT_QUOTES, 'UTF-8');
-    $mod = $lastmod ? gmdate('c', strtotime($lastmod)) : null;
+    $timestamp = $lastmod ? strtotime($lastmod) : false;
+    $mod = $timestamp !== false ? gmdate('c', $timestamp) : null;
     $xml = "  <url>\n    <loc>{$url}</loc>\n";
     if ($mod) $xml .= '    <lastmod>' . htmlspecialchars($mod, ENT_XML1, 'UTF-8') . "</lastmod>\n";
     $xml .= "    <changefreq>{$changefreq}</changefreq>\n    <priority>{$priority}</priority>\n  </url>\n";
@@ -39,20 +40,28 @@ try {
     ]);
 
     $urls = [];
-    $urls[] = xmlUrl($siteUrl, '/', gmdate('c'), 'hourly', '1.0');
-    $urls[] = xmlUrl($siteUrl, '/anime', null, 'daily', '0.9');
+    $seen = [];
+    $add = static function (string $path, ?string $lastmod, string $frequency, string $priority) use (&$urls, &$seen, $siteUrl): void {
+        $key = rtrim($siteUrl . '/' . ltrim($path, '/'), '/');
+        if (isset($seen[$key]) || count($urls) >= 50000) return;
+        $seen[$key] = true;
+        $urls[] = xmlUrl($siteUrl, $path, $lastmod, $frequency, $priority);
+    };
+    $add('/', gmdate('c'), 'hourly', '1.0');
+    $add('/latest', gmdate('c'), 'hourly', '0.9');
+    $add('/genres', null, 'weekly', '0.6');
 
     // Sesuaikan nama tabel/kolom berikut dengan skema aplikasi Anda.
     $genres = $pdo->query("SELECT slug, updated_at FROM genres WHERE is_active = 1 ORDER BY slug");
     foreach ($genres as $row) {
         $slug = safeSegment($row['slug'] ?? '');
-        if ($slug !== '') $urls[] = xmlUrl($siteUrl, '/genre/' . $slug, $row['updated_at'] ?? null, 'daily', '0.7');
+        if ($slug !== '') $add('/genres/' . $slug, $row['updated_at'] ?? null, 'daily', '0.7');
     }
 
     $anime = $pdo->query("SELECT slug, updated_at FROM anime WHERE status <> 'deleted' ORDER BY updated_at DESC");
     foreach ($anime as $row) {
         $slug = safeSegment($row['slug'] ?? '');
-        if ($slug !== '') $urls[] = xmlUrl($siteUrl, '/anime/' . $slug, $row['updated_at'] ?? null, 'daily', '0.8');
+        if ($slug !== '') $add('/anime/' . $slug, $row['updated_at'] ?? null, 'daily', '0.8');
     }
 
     $episodes = $pdo->query("SELECT a.slug AS anime_slug, e.slug AS episode_slug, e.updated_at, e.published_at
@@ -64,7 +73,7 @@ try {
         if ($animeSlug === '' || $episodeSlug === '') continue;
         $date = $row['updated_at'] ?? $row['published_at'] ?? null;
         $fresh = $date && strtotime($date) >= strtotime('-7 days');
-        $urls[] = xmlUrl($siteUrl, "/anime/{$animeSlug}/episode/{$episodeSlug}", $date, $fresh ? 'hourly' : 'weekly', $fresh ? '0.9' : '0.5');
+        $add("/watch/{$animeSlug}/{$episodeSlug}", $date, $fresh ? 'hourly' : 'weekly', $fresh ? '0.9' : '0.5');
     }
 
     echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n";
