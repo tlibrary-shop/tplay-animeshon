@@ -255,6 +255,11 @@ export default function Home() {
                         src={anime.img}
                         alt={anime.alt}
                         className="object-cover w-full h-full transform scale-105"
+                        width={1920}
+                        height={1080}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        fetchPriority={index === 0 ? "high" : "auto"}
+                        decoding={index === 0 ? "sync" : "async"}
                       />
                     </div>
                   )}
@@ -506,6 +511,10 @@ export default function Home() {
                   src="/banner.png"
                   alt="AniStream Banner"
                   className="w-full h-full object-cover"
+                  width={800}
+                  height={499}
+                  loading="lazy"
+                  decoding="async"
                 />
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />

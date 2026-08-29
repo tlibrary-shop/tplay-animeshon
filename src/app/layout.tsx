@@ -33,6 +33,10 @@ export default function RootLayout({
 }>) {
   return (
       <html lang="id">
+        <head>
+          <link rel="preconnect" href="https://api.animekudesu.web.id" crossOrigin="anonymous" />
+          <link rel="dns-prefetch" href="https://api.animekudesu.web.id" />
+        </head>
         <body className="antialiased bg-gray-800 text-white font-sans overflow-x-hidden">
           <Script
             async
