@@ -2,17 +2,17 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import AnimeClient from "./AnimeClient";
 import { JsonLd } from "@/components/Seo/JsonLd";
-import { getAnime, getAnimeDescription, getGenres, getPoster } from "@/utils/anime";
+import { getAnime, getAnimeDescription, getGenres, getPoster, seoAnimeDescription } from "@/utils/anime";
 import { SITE_URL } from "@/utils/config";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const anime = await getAnime(id);
   const title = anime?.title || id.replace(/[-_]/g, " ");
-  const description = anime ? getAnimeDescription(anime, `Nonton anime ${title} subtitle Indonesia dengan episode terbaru di AniStream.`) : `Nonton anime ${title} subtitle Indonesia dengan episode terbaru di AniStream.`;
+  const description = anime ? seoAnimeDescription(anime, title) : `Nonton anime ${title} subtitle Indonesia dengan episode terbaru di AniStream.`;
   const canonical = `${SITE_URL}/anime/${encodeURIComponent(id)}`;
   return {
-    title: `Nonton ${title} Sub Indo`,
+    title: `Nonton ${title} Sub Indo | Episode Lengkap`,
     description,
     keywords: [
       `nonton anime ${title}`,
@@ -30,7 +30,7 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
   const anime = await getAnime(id);
   if (!anime) notFound();
   const title = anime.title || id;
-  const description = getAnimeDescription(anime, `Informasi ${title} dan daftar episode subtitle Indonesia.`);
+  const description = seoAnimeDescription(anime, title);
   const genres = getGenres(anime);
   const poster = getPoster(anime);
   const canonical = `${SITE_URL}/anime/${encodeURIComponent(id)}`;
@@ -50,6 +50,7 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
     image: [poster], url: canonical,
     genre: genres, inLanguage: "id-ID", isFamilyFriendly: true,
     isPartOf: { "@id": `${SITE_URL}/#website` },
+    aggregateRating: anime.rating ? { "@type": "AggregateRating", ratingValue: Number(anime.rating), ratingCount: Number(anime.rating_count || 1), bestRating: 10 } : undefined,
   };
   const breadcrumb = {
     "@context": "https://schema.org", "@type": "BreadcrumbList",
@@ -82,7 +83,7 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
             {episodes.map((episode) => (
               <li key={String(episode.episode)}>
                 <a href={`${SITE_URL}/watch/${encodeURIComponent(id)}/${encodeURIComponent(String(episode.episode))}`}>
-                  {episode.title || `Episode ${episode.episode}`}
+                  {title} {episode.title || `Episode ${episode.episode}`} Sub Indo
                 </a>
               </li>
             ))}

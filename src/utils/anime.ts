@@ -10,6 +10,9 @@ export type AnimeEpisode = {
   description?: string;
   detail_eps?: string;
   updated_at?: string;
+  published_at?: string;
+  image?: string;
+  duration?: string;
 };
 
 export type AnimeDetail = {
@@ -24,6 +27,10 @@ export type AnimeDetail = {
   released?: string;
   rating?: string | number;
   rating_count?: string | number;
+  studio?: string;
+  studios?: string[];
+  year?: string | number;
+  type?: string;
   genres?: AnimeGenre[];
   episodes?: AnimeEpisode[];
 };
@@ -70,6 +77,12 @@ export function getAnimeDescription(anime: AnimeDetail, fallback: string) {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 160);
+}
+
+export function seoAnimeDescription(anime: AnimeDetail, title: string) {
+  const genres = getGenres(anime).slice(0, 3).join(", ");
+  const facts = [anime.type, anime.year || anime.released, anime.status, genres].filter(Boolean).join(" • ");
+  return getAnimeDescription(anime, `Nonton ${title} subtitle Indonesia di AniStream${facts ? ` — ${facts}` : ""}. Sinopsis, informasi, dan episode terbaru.`);
 }
 
 export function getPoster(anime: AnimeDetail) {

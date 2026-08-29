@@ -49,3 +49,15 @@ If you enjoy this project and want to support the development, you can scan the 
 <img src="./public/qrcode.png" alt="Donasi via Saweria" width="200" />
 
 Atau klik link ini: [**Donasi via Saweria**](https://saweria.co/RizalFirmansyah)
+# SEO deployment notes
+
+Set `NEXT_PUBLIC_SITE_URL`, `INDEXNOW_KEY`, and `INDEXNOW_SECRET` in the production environment. Replace `public/REPLACE_WITH_INDEXNOW_KEY.txt` with a file named exactly `<INDEXNOW_KEY>.txt` containing only the key. After an anime or episode is published, call:
+
+```bash
+curl -X POST https://anistreaming.com/api/indexnow \
+  -H "Content-Type: application/json" \
+  -H "x-indexnow-secret: $INDEXNOW_SECRET" \
+  -d '{"urls":["https://anistreaming.com/anime/example","https://anistreaming.com/watch/example/1"]}'
+```
+
+Integrate this call into the successful publish transaction (not a page visit). Submit `https://anistreaming.com/sitemap.xml` once in Google Search Console and Bing Webmaster Tools, then inspect representative anime and episode URLs. Check: HTTP 200, one canonical URL, indexable robots meta, unique title/description, valid JSON-LD, and visible internal links.

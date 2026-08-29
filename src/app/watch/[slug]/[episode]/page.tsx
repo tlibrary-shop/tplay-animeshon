@@ -81,16 +81,32 @@ export default async function WatchPage({ params }: Props) {
     description,
     thumbnailUrl: [poster],
     embedUrl: data.videoUrl,
+    uploadDate: data.episode.published_at || data.episode.updated_at,
+    duration: data.episode.duration,
     isPartOf: {
       "@type": "TVSeries",
       name: title,
       url: `${SITE_URL}/anime/${encodeURIComponent(slug)}`,
     },
   } : null;
+  const episodeSchema = {
+    "@context": "https://schema.org", "@type": "TVEpisode", "@id": `${canonical}#episode`,
+    name: `${title} ${episodeTitle}`, episodeNumber: Number(episodeNumber) || episodeNumber,
+    description, url: canonical, image: [poster], partOfSeries: { "@id": `${SITE_URL}/anime/${encodeURIComponent(slug)}#series`, name: title },
+    datePublished: data.episode.published_at || data.episode.updated_at,
+    video: data.videoUrl ? { "@id": `${canonical}#video` } : undefined,
+  };
+  const breadcrumb = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Beranda", item: SITE_URL },
+    { "@type": "ListItem", position: 2, name: title, item: `${SITE_URL}/anime/${encodeURIComponent(slug)}` },
+    { "@type": "ListItem", position: 3, name: episodeTitle, item: canonical },
+  ] };
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16 pt-24">
       {videoSchema && <JsonLd data={videoSchema} />}
+      <JsonLd data={episodeSchema} />
+      <JsonLd data={breadcrumb} />
       <nav aria-label="Breadcrumb" className="mb-4 text-sm text-gray-400">
         <a href={SITE_URL}>Beranda</a> / {title} / {episodeTitle}
       </nav>
@@ -119,6 +135,10 @@ export default async function WatchPage({ params }: Props) {
           Kembali ke halaman {title}
         </a>
       </p>
+      <nav aria-label="Tautan terkait" className="mt-5 flex gap-4 text-sm">
+        <a className="text-red-400 underline" href={`${SITE_URL}/latest`}>Episode anime terbaru</a>
+        <a className="text-red-400 underline" href={`${SITE_URL}/anime/${encodeURIComponent(slug)}`}>Semua episode {title}</a>
+      </nav>
     </main>
   );
 }
