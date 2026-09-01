@@ -307,6 +307,7 @@ const Navbar = () => {
           <span className='text-red-600 font-heading text-xl tracking-wider'>{t('menu')}</span>
           <button 
             onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Tutup menu"
             className='text-gray-400 hover:text-white transition-colors p-1'
           >
             <X className='w-6 h-6' />

@@ -252,6 +252,7 @@ export default function Home({ initialNewAnime }: HomeClientProps) {
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                         title={`${trailer.title || anime.title} Trailer`}
+                        loading="lazy"
                       />
                     </div>
                   ) : (
@@ -264,7 +265,7 @@ export default function Home({ initialNewAnime }: HomeClientProps) {
                         height={1080}
                         loading={index === 0 ? "eager" : "lazy"}
                         fetchPriority={index === 0 ? "high" : "auto"}
-                        decoding={index === 0 ? "sync" : "async"}
+                        decoding="async"
                       />
                     </div>
                   )}
@@ -505,6 +506,7 @@ export default function Home({ initialNewAnime }: HomeClientProps) {
               {/* Close Button */}
               <button 
                 onClick={closeBannerPopup}
+                aria-label="Tutup pengumuman"
                 className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-sm flex items-center justify-center transition-all hover:rotate-90 duration-200 border border-white/20"
               >
                 <X className="w-4 h-4 text-white" />
@@ -572,7 +574,8 @@ export default function Home({ initialNewAnime }: HomeClientProps) {
           >
             {/* Close Button */}
             <button 
-              onClick={() => setSelectedAnime(null)} 
+              onClick={() => setSelectedAnime(null)}
+              aria-label="Tutup detail anime"
               className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/60 hover:bg-black flex items-center justify-center transition-colors"
             >
               <X className="w-5 h-5" />

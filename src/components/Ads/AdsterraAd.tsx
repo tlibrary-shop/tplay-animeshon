@@ -25,22 +25,22 @@ export function AdsterraBanner({ size }: { size: AdSize }) {
   const key = bannerKeys[size];
   const { width, height } = dimensions[size];
   return (
-    <div className="ad-slot flex justify-center overflow-hidden" style={{ minHeight: height }} aria-label="Iklan">
+    <aside className="ad-slot flex justify-center overflow-hidden" style={{ minHeight: height }} aria-label="Iklan">
       <Script id={`adsterra-${key}`} strategy="afterInteractive">
         {`window.atOptions = {key: '${key}', format: 'iframe', height: ${height}, width: ${width}, params: {}};`}
       </Script>
       <Script src={`${HOST}/${key}/invoke.js`} strategy="afterInteractive" />
-    </div>
+    </aside>
   );
 }
 
 export function AdsterraNative() {
   const id = 'bcf5164b464a8e3c0b486cd50f77b999';
   return (
-    <div className="ad-slot min-h-[100px]" aria-label="Iklan rekomendasi">
+    <aside className="ad-slot min-h-[100px]" aria-label="Iklan rekomendasi">
       <Script async data-cfasync="false" src={`${HOST}/${id}/invoke.js`} strategy="afterInteractive" />
       <div id={`container-${id}`} />
-    </div>
+    </aside>
   );
 }
 
