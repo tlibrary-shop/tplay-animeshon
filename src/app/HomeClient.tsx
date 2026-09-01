@@ -106,19 +106,10 @@ export default function Home({ initialNewAnime }: HomeClientProps) {
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [myListLinks, setMyListLinks] = useState<string[]>([]);
   
-  // Check if banner should be shown (once per day)
+  // Jangan tampilkan popup otomatis pada load awal: popup menjadi kandidat
+  // LCP dan menambah pekerjaan main-thread pada perangkat mobile.
   useEffect(() => {
-    if (shouldShowBanner()) {
-      // Small delay before showing popup for better UX
-      const timer = setTimeout(() => {
-        setPopup(true);
-        // Trigger animation after popup is mounted
-        requestAnimationFrame(() => {
-          setShowPopupContent(true);
-        });
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
+    return undefined;
   }, []);
 
   // Handle closing the banner popup
