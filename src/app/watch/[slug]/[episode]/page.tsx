@@ -84,6 +84,7 @@ export default async function WatchPage({ params }: Props) {
     description,
     thumbnailUrl: [poster],
     embedUrl: data.videoUrl,
+    contentUrl: data.videoUrl,
     uploadDate: data.episode.published_at || data.episode.updated_at,
     duration: data.episode.duration,
     isPartOf: {
@@ -95,7 +96,7 @@ export default async function WatchPage({ params }: Props) {
   const episodeSchema = {
     "@context": "https://schema.org", "@type": "TVEpisode", "@id": `${canonical}#episode`,
     name: `${title} ${episodeTitle}`, episodeNumber: Number(episodeNumber) || episodeNumber,
-    description, url: canonical, image: [poster], partOfSeries: { "@id": `${SITE_URL}/anime/${encodeURIComponent(slug)}#series`, name: title },
+    description, url: canonical, image: [poster], partOfTVSeries: { "@id": `${SITE_URL}/anime/${encodeURIComponent(slug)}#series`, name: title, url: `${SITE_URL}/anime/${encodeURIComponent(slug)}` },
     datePublished: data.episode.published_at || data.episode.updated_at,
     video: data.videoUrl ? { "@id": `${canonical}#video` } : undefined,
   };

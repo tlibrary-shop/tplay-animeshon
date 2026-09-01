@@ -33,6 +33,11 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
   const description = seoAnimeDescription(anime, title);
   const genres = getGenres(anime);
   const poster = getPoster(anime);
+  const ratingValue = Number(anime.rating);
+  const ratingCount = Number(anime.rating_count);
+  const aggregateRating = Number.isFinite(ratingValue) && ratingValue > 0 && ratingValue <= 10 && Number.isFinite(ratingCount) && ratingCount >= 1
+    ? { "@type": "AggregateRating", ratingValue, ratingCount, bestRating: 10, worstRating: 0 }
+    : undefined;
   const canonical = `${SITE_URL}/anime/${encodeURIComponent(id)}`;
   const episodes = (anime.episodes || [])
     .filter((episode) => episode.episode != null)
@@ -50,7 +55,7 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
     image: [poster], url: canonical,
     genre: genres, inLanguage: "id-ID", isFamilyFriendly: true,
     isPartOf: { "@id": `${SITE_URL}/#website` },
-    aggregateRating: anime.rating ? { "@type": "AggregateRating", ratingValue: Number(anime.rating), ratingCount: Number(anime.rating_count || 1), bestRating: 10 } : undefined,
+    ...(aggregateRating ? { aggregateRating } : {}),
   };
   const breadcrumb = {
     "@context": "https://schema.org", "@type": "BreadcrumbList",
