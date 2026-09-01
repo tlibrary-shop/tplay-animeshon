@@ -45,6 +45,7 @@ const STATIC_ROUTES = [
   { path: "/contact", priority: 0.2, changeFrequency: "yearly" as const },
   { path: "/terms", priority: 0.1, changeFrequency: "yearly" as const },
   { path: "/privacy", priority: 0.1, changeFrequency: "yearly" as const },
+  { path: "/dmca", priority: 0.2, changeFrequency: "yearly" as const },
 ];
 
 function normalizeSlug(value: string) {
@@ -145,9 +146,55 @@ async function getAnimeUrls() {
   return { slugs: [...slugs], modified };
 }
 
+async function getCollectionUrls() {
+  const urls: Array<{ url: string; lastModified: Date; priority: number; changeFrequency: "daily" | "weekly" }> = [];
+  try {
+    const response = await fetch(`${API_URL}/genres`, { next: { revalidate } });
+    const json = await response.json();
+    for (const genre of json?.data || []) {
+      const slug = normalizeSlug(String(genre.id || genre.slug || ""));
+      if (!slug) continue;
+      urls.push({ url: `${SITE_URL}/genres/${encodeURIComponent(slug)}`, lastModified: new Date(), priority: 0.6, changeFrequency: "daily" });
+      const first = await fetchPage(`/genre-anime/${encodeURIComponent(slug)}`, 1, Date.now() + 5000);
+      const total = Math.min(Math.max(Number(first?.total_page) || 1, 1), MAX_PAGES_PER_ENDPOINT);
+      for (let page = 2; page <= total; page++) urls.push({ url: `${SITE_URL}/genres/${encodeURIComponent(slug)}?page=${page}`, lastModified: new Date(), priority: 0.4, changeFrequency: "weekly" });
+    }
+  } catch { /* sitemap remains valid when the catalogue API is unavailable */ }
+  for (const type of ["tv", "ova", "ona", "special", "movie"]) {
+    urls.push({ url: `${SITE_URL}/type/${type}`, lastModified: new Date(), priority: 0.5, changeFrequency: "weekly" });
+  }
+  return urls;
+}
+
+async function getEpisodeUrls(slugs: string[], modified: Map<string, Date>) {
+  const urls: Array<{ url: string; lastModified: Date; priority: number; changeFrequency: "daily" }> = [];
+  let cursor = 0;
+  async function worker() {
+    while (cursor < slugs.length) {
+      const slug = slugs[cursor++];
+      try {
+        const response = await fetch(`${API_URL}/detail-anime/${encodeURIComponent(slug)}`, { next: { revalidate } });
+        if (!response.ok) continue;
+        const payload = await response.json();
+        const anime = payload?.data || payload;
+        for (const episode of anime?.episodes || []) {
+          const description = String(episode.description || "").trim();
+          if (!description || episode.episode == null) continue;
+          const number = encodeURIComponent(String(episode.episode));
+          urls.push({ url: `${SITE_URL}/watch/${encodeURIComponent(slug)}/${number}`, lastModified: modified.get(slug) ?? new Date(), priority: 0.7, changeFrequency: "daily" });
+        }
+      } catch { /* omit episode when its factual metadata cannot be verified */ }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(8, slugs.length) }, worker));
+  return urls;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const { slugs, modified } = await getAnimeUrls();
+  const collectionUrls = await getCollectionUrls();
+  const episodeUrls = await getEpisodeUrls(slugs, modified);
   const entries = [
     ...STATIC_ROUTES.map(route => ({
       url: `${SITE_URL}${route.path}`,
@@ -161,6 +208,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
       changeFrequency: "daily" as const,
     })),
+    ...collectionUrls,
+    ...episodeUrls,
   ];
 
   // Defensive deduplication keeps the sitemap valid when an anime appears in
