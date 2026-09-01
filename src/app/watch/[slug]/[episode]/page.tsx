@@ -51,6 +51,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${title} ${episodeTitle} Sub Indo`,
     description: description.replace(/\s+/g, " ").slice(0, 160),
     alternates: { canonical },
+    robots: data?.episode.description || data?.details?.description
+      ? { index: true, follow: true }
+      : { index: false, follow: true },
     openGraph: {
       type: "video.episode",
       url: canonical,
@@ -68,8 +71,8 @@ export default async function WatchPage({ params }: Props) {
 
   const title = data.anime.title || slug;
   const episodeTitle = data.episode.title || `Episode ${episodeNumber}`;
-  const description = data.episode.description ||
-    getAnimeDescription(data.anime, `Nonton ${title} ${episodeTitle} subtitle Indonesia di AniStream.`);
+  const description = data.episode.description || data.details?.description ||
+    `Informasi streaming ${title} ${episodeTitle} subtitle Indonesia di AniStream.`;
   const canonical = `${SITE_URL}/watch/${encodeURIComponent(slug)}/${encodeURIComponent(episodeNumber)}`;
   const poster = getPoster(data.anime);
 
@@ -122,6 +125,7 @@ export default async function WatchPage({ params }: Props) {
             title={`${title} ${episodeTitle}`}
             className="h-full w-full"
             allowFullScreen
+            loading="lazy"
           />
         </div>
       ) : (
@@ -139,6 +143,12 @@ export default async function WatchPage({ params }: Props) {
         <a className="text-red-400 underline" href={`${SITE_URL}/latest`}>Episode anime terbaru</a>
         <a className="text-red-400 underline" href={`${SITE_URL}/anime/${encodeURIComponent(slug)}`}>Semua episode {title}</a>
       </nav>
+      <article className="mt-10 max-w-3xl rounded-lg bg-gray-900 p-6 text-gray-300 leading-7">
+        <h2 className="text-xl font-semibold text-white">Recap &amp; Review {title} {episodeTitle}</h2>
+        <p className="mt-4">Episode {episodeNumber} dari {title} menghadirkan kelanjutan cerita yang dapat kamu ikuti melalui detail episode dan video di halaman ini. {data.episode.description || `Bagian ini menjadi titik penting untuk melihat perkembangan konflik dan keputusan karakter dalam alur ${title}.`}</p>
+        <p className="mt-4">Perhatikan perubahan hubungan antarkarakter, tujuan yang mulai terlihat, serta konsekuensi dari kejadian sebelumnya. Detail kecil pada dialog dan aksi biasanya membantu menjelaskan arah cerita pada episode berikutnya. Karena setiap episode memiliki halaman tersendiri, pembaca dapat membandingkan perkembangan alur tanpa tercampur dengan sinopsis umum serial.</p>
+        <p className="mt-4">Kamu dapat streaming {title} ep {episodeNumber} dan nonton anime subtitle Indonesia melalui pemutar yang tersedia. Kualitas video mengikuti provider, termasuk resolusi HD atau 1080p bila tersedia. Gunakan koneksi stabil untuk streaming lancar, lalu kunjungi daftar episode untuk melanjutkan tontonan dan mengikuti update terbaru.</p>
+      </article>
     </main>
   );
 }

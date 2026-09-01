@@ -25,6 +25,7 @@ const Footer = () => {
       { label: "Contact Us", href: "/contact" },
       { label: "Terms of Service", href: "/terms" },
       { label: "Privacy Policy", href: "/privacy" },
+      { label: "DMCA / Copyright", href: "/dmca" },
     ],
   };
 

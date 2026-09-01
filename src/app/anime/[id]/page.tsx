@@ -72,9 +72,11 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
     <JsonLd data={schema} />
     <JsonLd data={breadcrumb} />
     {episodeList && <JsonLd data={episodeList} />}
-    <section className="px-4 pt-24 pb-6 md:px-16 md:pt-28 bg-gray-900" aria-label={`Informasi ${title}`}>
+    <main><article className="px-4 pt-24 pb-6 md:px-16 md:pt-28 bg-gray-900" aria-label={`Informasi ${title}`}>
       <h1 className="text-2xl md:text-3xl font-semibold">Nonton {title} Sub Indo</h1>
+      <h2 className="mt-6 text-xl font-semibold">Sinopsis</h2>
       <p className="mt-3 max-w-4xl text-gray-300 leading-7">{description}</p>
+      <h2 className="mt-6 text-xl font-semibold">Karakter dan Informasi</h2>
       {genres.length > 0 && <p className="mt-2 text-sm text-gray-400">Genre: {genres.join(", ")}</p>}
       {episodes.length > 0 && (
         <nav aria-label={`Daftar episode ${title}`}>
@@ -90,7 +92,6 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
           </ul>
         </nav>
       )}
-    </section>
-    <AnimeClient params={Promise.resolve({ id })} />
+    </article><AnimeClient params={Promise.resolve({ id })} /></main>
   </>;
 }
