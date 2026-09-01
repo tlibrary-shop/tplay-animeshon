@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import React, { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
@@ -257,15 +258,13 @@ export default function Home({ initialNewAnime }: HomeClientProps) {
                     </div>
                   ) : (
                     <div className="absolute inset-0">
-                      <img
+                      <Image
                         src={anime.img}
                         alt={anime.alt}
                         className="object-cover w-full h-full transform scale-105"
-                        width={1920}
-                        height={1080}
-                        loading={index === 0 ? "eager" : "lazy"}
-                        fetchPriority={index === 0 ? "high" : "auto"}
-                        decoding="async"
+                        fill
+                        priority={index === 0}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1280px"
                       />
                     </div>
                   )}
