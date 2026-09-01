@@ -236,7 +236,7 @@ export default function Home({ initialNewAnime }: HomeClientProps) {
               <SwiperSlide key={index}>
                 <div className="relative h-[70vh] md:h-[90vh] w-full overflow-hidden">
                   {/* Background - Video or Image */}
-                  {trailer && trailerUrl && isActiveSlide ? (
+                    {trailer && trailerUrl && isActiveSlide ? (
                     <div className="absolute inset-0 w-full h-full">
                       <iframe
                         src={trailerUrl}
@@ -249,14 +249,15 @@ export default function Home({ initialNewAnime }: HomeClientProps) {
                     </div>
                   ) : (
                     <div className="absolute inset-0">
-                      <Image
+                      {(index === 0 || index === activeSlideIndex) && <Image
                         src={anime.img}
                         alt={anime.alt}
                         className="object-cover w-full h-full transform scale-105"
                         fill
                         priority={index === 0}
+                        fetchPriority={index === 0 ? "high" : "auto"}
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1280px"
-                      />
+                      />}
                     </div>
                   )}
 
