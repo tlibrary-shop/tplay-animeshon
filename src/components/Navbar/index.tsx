@@ -112,13 +112,16 @@ const Navbar = () => {
     return pathname.startsWith(href);
   };
 
+  const navbarClasses = isScrolled 
+    ? 'bg-slate-900/95 backdrop-blur-md shadow-lg border-b border-blue-500/20' 
+    : 'bg-gradient-to-b from-slate-900 via-slate-900/80 to-transparent border-b border-blue-500/10';
+
+  const mobileMenuClasses = isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full';
+  const overlayClasses = isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none';
+
   return (
     <>
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-slate-900/95 backdrop-blur-md shadow-lg border-b border-blue-500/20' 
-          : 'bg-gradient-to-b from-slate-900 via-slate-900/80 to-transparent border-b border-blue-500/10'
-      }`}>
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${navbarClasses}`}>
         <div className='flex min-w-0 justify-between items-center px-4 py-3 md:px-8'>
           {/* Logo & Menu */}
           <div className='flex min-w-0 items-center gap-3 md:gap-6'>
@@ -289,17 +292,13 @@ const Navbar = () => {
 
       {/* Mobile Menu Overlay */}
       <div 
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${(
-          isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        )}`}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${overlayClasses}`}
         onClick={() => setIsMobileMenuOpen(false)}
       />
 
       {/* Mobile Menu Drawer */}
       <div 
-        className={`fixed top-0 right-0 h-full w-[min(18rem,85vw)] bg-slate-900 z-50 md:hidden transform transition-transform duration-300 ease-out border-l border-blue-500/20 ${
-          isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-        )}`}
+        className={`fixed top-0 right-0 h-full w-[min(18rem,85vw)] bg-slate-900 z-50 md:hidden transform transition-transform duration-300 ease-out border-l border-blue-500/20 ${mobileMenuClasses}`}
       >
         {/* Menu Header */}
         <div className='flex items-center justify-between p-4 border-b border-blue-500/20'>
@@ -326,7 +325,7 @@ const Navbar = () => {
                       isActiveLink(link.href)
                         ? 'bg-blue-500/20 text-blue-400 font-medium'
                         : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                    )}`}
+                    }`}
                   >
                     <Icon className='w-4 h-4' />
                     <span>{link.label}</span>
