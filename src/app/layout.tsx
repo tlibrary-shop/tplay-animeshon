@@ -4,7 +4,6 @@ import "./globals.css";
 // @ts-ignore
 import "swiper/css/bundle";
 import { Providers } from "@/components/Providers";
-import { AdsterraSiteScripts } from "@/components/Ads/AdsterraAd";
 import { SITE_URL } from "@/utils/config";
 import { JsonLd } from "@/components/Seo/JsonLd";
 
@@ -38,6 +37,7 @@ export default function RootLayout({
           <link rel="dns-prefetch" href="https://api.animekudesu.web.id" />
         </head>
         <body className="antialiased bg-gray-800 text-white font-sans overflow-x-hidden">
+          {/* Google Analytics tetap dipertahankan karena ini untuk statistik pengunjung, bukan iklan */}
           <Script
             async
             src="https://www.googletagmanager.com/gtag/js?id=G-C4EQ753MZB"
@@ -51,13 +51,13 @@ export default function RootLayout({
               gtag('config', 'G-C4EQ753MZB');
             `}
           </Script>
-          <Script src="/Script.js" strategy="afterInteractive" />
+          
           <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: "AniStream", url: SITE_URL, inLanguage: ["id-ID", "en-US"], potentialAction: { "@type": "SearchAction", target: `${SITE_URL}/search?q={search_term_string}`, "query-input": "required name=search_term_string" } }} />
           <JsonLd data={{ "@context": "https://schema.org", "@type": "Organization", "@id": `${SITE_URL}/#organization`, name: "AniStream", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/banner.png` } }} />
+          
           <Providers>
             {children}
           </Providers>
-          <AdsterraSiteScripts />
         </body>
       </html>
   );
