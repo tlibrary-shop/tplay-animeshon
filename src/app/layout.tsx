@@ -52,8 +52,8 @@ export default function RootLayout({
             `}
           </Script>
           
-          <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: "TPLAY-ANIMESHON", url: SITE_URL, inLanguage: ["id-ID", "en-US"], potentialAction: { [...]
-          <JsonLd data={{ "@context": "https://schema.org", "@type": "Organization", "@id": `${SITE_URL}/#organization`, name: "TPLAY-ANIMESHON", url: SITE_URL, logo: { "@type": "ImageObject", url: `${S[...]
+          <JsonLd data={{ "@context": "https://schema.org", "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: "TPLAY-ANIMESHON", url: SITE_URL, inLanguage: ["id-ID", "en-US"], potentialAction: { "@type": "SearchAction", target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/search?q={search_term_string}` }, query: "required name=search_term_string" } }} />
+          <JsonLd data={{ "@context": "https://schema.org", "@type": "Organization", "@id": `${SITE_URL}/#organization`, name: "TPLAY-ANIMESHON", url: SITE_URL, logo: { "@type": "ImageObject", url: `${SITE_URL}/favicon.ico`, width: 32, height: 32 }, sameAs: [] }} />
           
           <Providers>
             {children}
